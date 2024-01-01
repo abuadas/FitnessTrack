@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">FitnessTrack</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="remember_me">Remember me</string>
+    <string name="sign_in">Sign in</string>
+    <string name="create_account">Dont have account? Create Account</string>
+    <string name="username">Username</string>
+    <string name="sign_up">Sign up</string>
+    <string name="account_exist">Already have an account? Sign in</string>
+    <string name="daily_summary">Daily Summary</string>
+    <string name="steps">Steps</string>
+    <string name="calories_burned">Calories Burned</string>
+    <string name="hours_of_sleep">Hours Of Sleep</string>
+    <string name="distance">Distance</string>
+    <string name="details">Additional Details</string>
+    <string name="back">Back</string>
+    <string name="weight">Weight (Kg)</string>
+    <string name="height">Hight (m)</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="age">Age</string>
+    <string name="sleep_hours">Sleep Hours</string>
+    <string name="update_profile">Update Profile</string>
+    <string name="bmi">BMI :</string>
+    <string name="gender">Gender</string>
+</resources>
