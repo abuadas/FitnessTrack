@@ -94,7 +94,6 @@ public class EditProfileActivity extends AppCompatActivity {
         Intent userProfileIntent = new Intent(EditProfileActivity.this, UserProfileActivity.class);
         userProfileIntent.putExtra("weight", edtTxtWeight.getText().toString());
         userProfileIntent.putExtra("height", edtTxtHeight.getText().toString());
-
         int selectedGenderId = radioGroupGender.getCheckedRadioButtonId();
         RadioButton selectedGender = findViewById(selectedGenderId);
         userProfileIntent.putExtra("gender", selectedGender.getText().toString());
@@ -103,5 +102,4 @@ public class EditProfileActivity extends AppCompatActivity {
         startActivity(userProfileIntent);
         finish();
     }
-
 }

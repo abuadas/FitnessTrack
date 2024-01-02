@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class UserProfileActivity extends AppCompatActivity {
 
     private String username;
-    private String weight, height, gender, age;
+    private String weight, height, gender, age, sleepHours;
     private float bmi;
 
     private TextView txtUsername, txtWeight, txtHeight, txtGender, txtAge, txtBMI;
@@ -23,12 +23,9 @@ public class UserProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
         initializeViews();
+
         Intent intent = getIntent();
         processIntentData(intent);
-        calculateBMI();
-        txtBMI.setText("BMI: " + String.format("%.2f", bmi));
-        navigateToEditProfile();
-
     }
 
     private void initializeViews() {
@@ -36,7 +33,6 @@ public class UserProfileActivity extends AppCompatActivity {
         txtHeight = findViewById(R.id.txtHeight);
         txtGender = findViewById(R.id.txtGender);
         txtAge = findViewById(R.id.txtAge);
-
     }
 
     private void processIntentData(Intent intent) {
@@ -59,13 +55,12 @@ public class UserProfileActivity extends AppCompatActivity {
         }
     }
 
+
     private void calculateBMI() {
         float weightInKg = Float.parseFloat(weight);
         float heightInMeters = Float.parseFloat(height) / 100;
 
         bmi = weightInKg / (heightInMeters * heightInMeters);
-
-        txtBMI.setText("BMI: " + String.format("%.2f", bmi));
     }
 
     private void navigateToEditProfile() {
