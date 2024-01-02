@@ -22,7 +22,16 @@ public class SignInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+        initializeViews();
+        btnSignIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signIn();
+            }
+        });
+    }
 
+    private void initializeViews() {
         edtTxtSignInEmail = findViewById(R.id.edtTxtSignInEmail);
         edtTxtSignInPass = findViewById(R.id.edtTxtSignInPass);
         checkBoxRememberSignIn = findViewById(R.id.checkBoxRememberSignIn);
@@ -34,13 +43,6 @@ public class SignInActivity extends AppCompatActivity {
         String savedPassword = prefs.getString("password", "");
         edtTxtSignInEmail.setText(savedEmail);
         edtTxtSignInPass.setText(savedPassword);
-
-        btnSignIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signIn();
-            }
-        });
     }
 
     private void signIn() {

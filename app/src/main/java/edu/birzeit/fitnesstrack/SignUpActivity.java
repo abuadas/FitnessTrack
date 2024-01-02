@@ -23,7 +23,16 @@ public class SignUpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+        initializeViews();
+        btnSignUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signUp();
+            }
+        });
+    }
 
+    private void initializeViews() {
         edtTxtName = findViewById(R.id.edtTxtName);
         edtTxtSignUpEmail = findViewById(R.id.edtTxtSignUpEmail);
         edtTxtSignUpPass = findViewById(R.id.edtTxtSignUpPass);
@@ -31,13 +40,6 @@ public class SignUpActivity extends AppCompatActivity {
         btnSignUp = findViewById(R.id.btnSignUp);
 
         pref = getSharedPreferences("userPreferences", MODE_PRIVATE);
-
-        btnSignUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signUp();
-            }
-        });
     }
 
     private void signUp() {

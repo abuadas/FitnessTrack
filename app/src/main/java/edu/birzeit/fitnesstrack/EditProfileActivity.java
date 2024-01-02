@@ -18,22 +18,12 @@ public class EditProfileActivity extends AppCompatActivity {
     private RadioButton radioMale, radioFemale;
     private Button btnBack, btnUpdateProfile;
 
-    private String username; // You can obtain this from previous activity or shared preferences
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
 
-        edtTxtWeight = findViewById(R.id.edtTxtWeight);
-        edtTxtHeight = findViewById(R.id.edtTxtHeight);
-        edtTxtAge = findViewById(R.id.edtTxtAge);
-        radioGroupGender = findViewById(R.id.radioGroupGender);
-        radioMale = findViewById(R.id.radioMale);
-        radioFemale = findViewById(R.id.radioFemale);
-        btnBack = findViewById(R.id.btnBack);
-        btnUpdateProfile = findViewById(R.id.btnUpdateProfile);
-
+        initializeViews();
         loadUserProfile();
 
         btnBack.setOnClickListener(new View.OnClickListener() {
@@ -49,6 +39,17 @@ public class EditProfileActivity extends AppCompatActivity {
                 updateProfile();
             }
         });
+    }
+
+    private void initializeViews() {
+        edtTxtWeight = findViewById(R.id.edtTxtWeight);
+        edtTxtHeight = findViewById(R.id.edtTxtHeight);
+        edtTxtAge = findViewById(R.id.edtTxtAge);
+        radioGroupGender = findViewById(R.id.radioGroupGender);
+        radioMale = findViewById(R.id.radioMale);
+        radioFemale = findViewById(R.id.radioFemale);
+        btnBack = findViewById(R.id.btnBack);
+        btnUpdateProfile = findViewById(R.id.btnUpdateProfile);
     }
 
     private void loadUserProfile() {
@@ -93,9 +94,14 @@ public class EditProfileActivity extends AppCompatActivity {
         Intent userProfileIntent = new Intent(EditProfileActivity.this, UserProfileActivity.class);
         userProfileIntent.putExtra("weight", edtTxtWeight.getText().toString());
         userProfileIntent.putExtra("height", edtTxtHeight.getText().toString());
-        userProfileIntent.putExtra("gender", radioGroupGender.getCheckedRadioButtonId());
+
+        int selectedGenderId = radioGroupGender.getCheckedRadioButtonId();
+        RadioButton selectedGender = findViewById(selectedGenderId);
+        userProfileIntent.putExtra("gender", selectedGender.getText().toString());
+
         userProfileIntent.putExtra("age", edtTxtAge.getText().toString());
         startActivity(userProfileIntent);
         finish();
     }
+
 }

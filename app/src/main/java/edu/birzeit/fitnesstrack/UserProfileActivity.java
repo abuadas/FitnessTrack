@@ -1,13 +1,12 @@
 package edu.birzeit.fitnesstrack;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.os.Bundle;
-
 import android.content.Intent;
+import android.os.Bundle;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 
 public class UserProfileActivity extends AppCompatActivity {
@@ -23,11 +22,7 @@ public class UserProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
-
-        txtWeight = findViewById(R.id.txtWeight);
-        txtHeight = findViewById(R.id.txtHeight);
-        txtGender = findViewById(R.id.txtGender);
-        txtAge = findViewById(R.id.txtAge);
+        initializeViews();
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -47,6 +42,13 @@ public class UserProfileActivity extends AppCompatActivity {
 
             txtAge.setText(age);
         }
+    }
+
+    private void initializeViews() {
+        txtWeight = findViewById(R.id.txtWeight);
+        txtHeight = findViewById(R.id.txtHeight);
+        txtGender = findViewById(R.id.txtGender);
+        txtAge = findViewById(R.id.txtAge);
     }
 
     private void loadUserProfile() {
@@ -77,4 +79,6 @@ public class UserProfileActivity extends AppCompatActivity {
         startActivity(mainIntent);
         finish();
     }
+
+
 }
