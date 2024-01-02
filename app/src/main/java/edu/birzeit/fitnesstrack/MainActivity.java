@@ -99,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
+
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -159,6 +161,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
         }
     }
+
+
 
     @Override
     public void onLocationChanged(Location location) {
