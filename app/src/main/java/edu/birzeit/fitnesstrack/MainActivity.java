@@ -3,6 +3,7 @@ package edu.birzeit.fitnesstrack;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -37,16 +38,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView txtSteps, txtCalories, txtDistance;
     private Button btnDetailedInfo;
     private SensorManager sensorManager;
-    private Sensor stepCounterSensor;
-    private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int SENSOR_TYPE_STEP_COUNTER = 19;
-    private long stepCount = 0;
-    private static final double AVERAGE_STRIDE_LENGTH = 0.762;
-    private static final double CALORIES_BURNED_PER_STEP = 0.04;
-    private static final String STEP_COUNT_KEY = "step_count";
+    private Sensor sensor;
+
+
     private RequestQueue requestQueue;
     private static final String API_URL = "https://maps.googleapis.com/maps/api/geocode/json";
     private LocationManager locationManager;
+
+    private static long STEP_COUNTER = 0;
+    private static long INITIAL_STEP_COUNT = 0;
+    private static final int PERMISSION_REQUEST_CODE = 1;
+    private static final int SENSOR_TYPE_STEP_COUNTER = 19;
+    private static final double AVERAGE_STRIDE_LENGTH = 0.762;
+    private static final double CALORIES_BURNED_PER_STEP = 0.04;
+    private static final String STEP_COUNT_KEY = "stepCount";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +59,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         initializeViews();
         checkSensorAvailability();
+        requestLocationUpdates();
         setDetailedInfoButtonListener();
         requestQueue = Volley.newRequestQueue(this);
+        INITIAL_STEP_COUNT = STEP_COUNTER;
     }
 
     private void initializeViews() {
@@ -64,27 +71,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         txtDistance = findViewById(R.id.txtDistance);
         btnDetailedInfo = findViewById(R.id.btnDetailedInfo);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        stepCounterSensor = sensorManager.getDefaultSensor(SENSOR_TYPE_STEP_COUNTER);
+        sensor = sensorManager.getDefaultSensor(SENSOR_TYPE_STEP_COUNTER);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == SENSOR_TYPE_STEP_COUNTER) {
-            long currentSteps = (long) event.values[0];
-            if (stepCount == 0) {
-                stepCount = currentSteps;
-            }
-            long stepsSinceLastUpdate = currentSteps - stepCount;
-            stepCount = currentSteps;
-
-            txtSteps.setText("Steps: ".concat(String.valueOf(currentSteps)));
-            double caloriesBurned = stepsSinceLastUpdate * CALORIES_BURNED_PER_STEP;
+            long newStepCount = (long) event.values[0];
+            long stepsSinceStart = newStepCount - INITIAL_STEP_COUNT;
+            txtSteps.setText("Steps: ".concat(String.valueOf(stepsSinceStart)));
+            txtSteps.setText("Steps: ".concat(String.valueOf(newStepCount)));
+            double caloriesBurned = stepsSinceStart * CALORIES_BURNED_PER_STEP;
             txtCalories.setText("Calories burned: ".concat(String.valueOf(caloriesBurned)));
-            double distance = stepsSinceLastUpdate * AVERAGE_STRIDE_LENGTH;
+            double distance = stepsSinceStart * AVERAGE_STRIDE_LENGTH;
             txtDistance.setText("Distance: ".concat(String.valueOf(distance)));
         }
     }
+
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
@@ -93,19 +98,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
         } else {
             Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
         }
     }
 
-
-
     @Override
     protected void onResume() {
         super.onResume();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED) {
-            sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
     }
 
@@ -118,37 +121,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong(STEP_COUNT_KEY, stepCount);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        stepCount = savedInstanceState.getLong(STEP_COUNT_KEY);
-        txtSteps.setText("Steps: ".concat(String.valueOf(stepCount)));
-        double caloriesBurned = stepCount * CALORIES_BURNED_PER_STEP;
-        txtCalories.setText("Calories burned: ".concat(String.valueOf(caloriesBurned)));
-        double distance = stepCount * AVERAGE_STRIDE_LENGTH;
-        txtDistance.setText("Distance: ".concat(String.valueOf(distance)));
+        outState.putLong(STEP_COUNT_KEY, STEP_COUNTER);
     }
 
     private void checkSensorAvailability() {
-        if (stepCounterSensor == null) {
-            Toast.makeText(this, "Step Counter Sensor is not available", Toast.LENGTH_SHORT).show();
-        } else if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACTIVITY_RECOGNITION}, PERMISSION_REQUEST_CODE);
+        if (sensor == null || ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACTIVITY_RECOGNITION, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
         } else {
-            sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
-    }
-
-    private void setDetailedInfoButtonListener() {
-        btnDetailedInfo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                requestLocationUpdates();
-            }
-        });
     }
 
     @SuppressLint("MissingPermission")
@@ -162,17 +143,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-
-
     @Override
     public void onLocationChanged(Location location) {
-        double lat2 = location.getLatitude();
-        double lon2 = location.getLongitude();
+        double distLat = location.getLatitude();
+        double distLon = location.getLongitude();
         locationManager.removeUpdates(this);
-        fetchDataFromAPI(lat2, lon2);
+        fetchDataFromAPI(distLat, distLon);
     }
 
-    private void fetchDataFromAPI(double lat2, double lon2) {
+    private void fetchDataFromAPI(double distLat, double distLon) {
         String address = " ";
         String apiKey = "API_KEY";
         String url = API_URL + "?address=" + address + "&key=" + apiKey;
@@ -201,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             JSONArray results = jsonObject.getJSONArray("results");
             if (results.length() > 0) {
                 JSONObject result = results.getJSONObject(0);
-                return result.getString("formatted_address");
+                return result.getString("formattedAddress");
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -220,18 +199,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private double calculateDistance(String location) {
         String[] coordinates = location.split(",");
-        double lat1 = Double.parseDouble(coordinates[0]);
-        double lon1 = Double.parseDouble(coordinates[1]);
-        double lat2 = 0;
-        double lon2 = 0;
-
-        final int R = 6371;
-        double latDistance = Math.toRadians(lat2 - lat1);
-        double lonDistance = Math.toRadians(lon2 - lon1);
+        double sourceLat = Double.parseDouble(coordinates[0]);
+        double sourceLong = Double.parseDouble(coordinates[1]);
+        double distLat = 37.7749;
+        double distLon = -122.4194;
+        final int earthRadius = 6371;
+        double latDistance = Math.toRadians(distLat - sourceLat);
+        double lonDistance = Math.toRadians(distLon - sourceLong);
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                + Math.cos(Math.toRadians(sourceLat)) * Math.cos(Math.toRadians(distLat))
                 * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
+        double distance = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return earthRadius * distance;
+    }
+
+    private void setDetailedInfoButtonListener() {
+        btnDetailedInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, EditProfileActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
