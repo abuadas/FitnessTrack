@@ -103,4 +103,21 @@
         android:textAllCaps="false"
         android:textSize="18sp" />
 
+    <Button
+        android:id="@+id/btnExercises"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnDetailedInfo"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="84dp"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="84dp"
+        android:gravity="center|center_horizontal"
+        android:padding="16dp"
+        android:text="@string/exercise"
+        android:textAllCaps="false"
+        android:textSize="18sp" />
+
 </RelativeLayout>

@@ -33,12 +33,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener, LocationListener {
 
     private TextView txtSteps, txtCalories, txtDistance;
-    private Button btnDetailedInfo;
+    private Button btnDetailedInfo, btnExercises;
     private SensorManager sensorManager;
     private Sensor sensor;
+
+    private List<String> exercises;
+    private boolean isResponseReceived = false;
 
 
     private RequestQueue requestQueue;
@@ -61,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         checkSensorAvailability();
         requestLocationUpdates();
         setDetailedInfoButtonListener();
+        setExerciseInfoButtonListener();
         requestQueue = Volley.newRequestQueue(this);
         INITIAL_STEP_COUNT = STEP_COUNTER;
     }
@@ -70,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         txtCalories = findViewById(R.id.txtCalories);
         txtDistance = findViewById(R.id.txtDistance);
         btnDetailedInfo = findViewById(R.id.btnDetailedInfo);
+        btnExercises = findViewById(R.id.btnExercises);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(SENSOR_TYPE_STEP_COUNTER);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -81,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             long newStepCount = (long) event.values[0];
             long stepsSinceStart = newStepCount - INITIAL_STEP_COUNT;
             txtSteps.setText("Steps: ".concat(String.valueOf(stepsSinceStart)));
-            txtSteps.setText("Steps: ".concat(String.valueOf(newStepCount)));
+//            txtSteps.setText("Steps: ".concat(String.valueOf(newStepCount)));
             double caloriesBurned = stepsSinceStart * CALORIES_BURNED_PER_STEP;
             txtCalories.setText("Calories burned: ".concat(String.valueOf(caloriesBurned)));
             double distance = stepsSinceStart * AVERAGE_STRIDE_LENGTH;
@@ -174,6 +182,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         requestQueue.add(stringRequest);
     }
 
+    private void parseExercisesResponse(JSONArray response) {
+        exercises = new ArrayList<>();
+        try {
+            for (int i = 0; i < response.length(); i++) {
+                String name = response.getJSONObject(i).getString("name");
+                exercises.add(name);
+            }
+            isResponseReceived = true;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     private String parseLocationFromResponse(String response) {
         try {
             JSONObject jsonObject = new JSONObject(response);
@@ -219,6 +240,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, EditProfileActivity.class);
                 startActivity(intent);
+            }
+        });
+    }
+
+    private void setExerciseInfoButtonListener() {
+        btnExercises.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, ExercisesActivity.class);
+                intent.putStringArrayListExtra("exercises", (ArrayList<String>) exercises);
+                if (isResponseReceived) {
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(MainActivity.this, "Exercises data not yet received", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
