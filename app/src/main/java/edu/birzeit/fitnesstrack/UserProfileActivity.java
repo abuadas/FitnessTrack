@@ -11,8 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class UserProfileActivity extends AppCompatActivity {
 
-    private String username; // You can obtain this from registration info or shared preferences
-    private String weight, height, gender, age, sleepHours;
+    private String username;
+    private String weight, height, gender, age;
     private float bmi;
 
     private TextView txtUsername, txtWeight, txtHeight, txtGender, txtAge, txtBMI;
@@ -23,25 +23,12 @@ public class UserProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
         initializeViews();
-
         Intent intent = getIntent();
-        if (intent != null) {
-            String weight = intent.getStringExtra("weight");
-            String height = intent.getStringExtra("height");
-            int genderId = intent.getIntExtra("gender", -1);
-            String age = intent.getStringExtra("age");
+        processIntentData(intent);
+        calculateBMI();
+        txtBMI.setText("BMI: " + String.format("%.2f", bmi));
+        navigateToEditProfile();
 
-            txtWeight.setText(weight);
-            txtHeight.setText(height);
-
-            if (genderId != -1) {
-                RadioButton radioButton = findViewById(genderId);
-                String gender = radioButton.getText().toString();
-                txtGender.setText(gender);
-            }
-
-            txtAge.setText(age);
-        }
     }
 
     private void initializeViews() {
@@ -49,14 +36,27 @@ public class UserProfileActivity extends AppCompatActivity {
         txtHeight = findViewById(R.id.txtHeight);
         txtGender = findViewById(R.id.txtGender);
         txtAge = findViewById(R.id.txtAge);
+
     }
 
-    private void loadUserProfile() {
-        txtUsername.setText("Username: " + username);
-        txtWeight.setText("Weight: " + weight);
-        txtHeight.setText("Height: " + height);
-        txtGender.setText("Gender: " + gender);
-        txtAge.setText("Age: " + age);
+    private void processIntentData(Intent intent) {
+        if (intent != null) {
+            weight = intent.getStringExtra("weight");
+            height = intent.getStringExtra("height");
+            int genderId = intent.getIntExtra("gender", -1);
+            age = intent.getStringExtra("age");
+
+            txtWeight.setText("Weight: " + weight);
+            txtHeight.setText("Height: " + height);
+
+            if (genderId != -1) {
+                RadioButton radioButton = findViewById(genderId);
+                gender = radioButton.getText().toString();
+                txtGender.setText("Gender: " + gender);
+            }
+
+            txtAge.setText("Age: " + age);
+        }
     }
 
     private void calculateBMI() {
